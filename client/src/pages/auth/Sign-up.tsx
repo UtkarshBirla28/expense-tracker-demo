@@ -42,49 +42,56 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="max-w-xl mx-auto flex flex-col justify-center h-screen">
-      <h1 className="text-2xl font-bold mb-6">Sign Up</h1>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter your email" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <Input type="password" placeholder="Enter your password" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? "Signing Up..." : "Sign Up"}
-          </Button>
-          {error && <p className="text-red-500 mt-2">{error}</p>}
-          {success && <p className="text-green-500 mt-2">Signup Successful!</p>}
-        </form>
-      </Form>
-      <p className="text-center mt-4 text-gray-600">
-        Already have an account?{" "}
-        <Link to="/signin" className="text-blue-600 hover:text-blue-800 font-medium">
-          Sign in
-        </Link>
-      </p>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div className="text-center">
+          <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Expense Tracker</h1>
+          <h2 className="text-2xl font-bold text-gray-700">Create Account</h2>
+          <p className="mt-2 text-sm text-gray-600">
+            Already have an account?{" "}
+            <Link to="/signin" className="font-medium text-indigo-600 hover:text-indigo-500">
+              Sign in
+            </Link>
+          </p>
+        </div>
+        <div className="bg-white p-8 rounded-lg shadow-md">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter your email" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="Enter your password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="w-full" disabled={loading} variant={"outline"}>
+              {loading ? "Signing Up..." : "Sign Up"}
+              </Button>
+              {error && <p className="text-red-500 mt-2">{error}</p>}
+              {success && <p className="text-green-500 mt-2">Signup Successful!</p>}
+            </form>
+          </Form>
+        </div>
+      </div>
     </div>
   )
 }
