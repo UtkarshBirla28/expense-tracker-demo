@@ -2,6 +2,11 @@
 
 Ever found yourself in a heated argument about where all the money went? Well, this Expense Tracker is here to save the day! Now you can prove (with cold, hard data) that those mysterious expenses were not yours but hers. 😉
 
+## 🚀 Live Demo
+👉 **Check it out here:** [Expense Tracker Demo](https://expense-tracker-demo-five.vercel.app)
+
+---
+
 ## 🚀 Tech Stack
 This application is built with a modern tech stack, split into two parts:
 
