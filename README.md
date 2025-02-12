@@ -5,6 +5,8 @@ Ever found yourself in a heated argument about where all the money went? Well, t
 ## 🚀 Live Demo
 👉 **Check it out here:** [Expense Tracker Demo](https://expense-tracker-demo-five.vercel.app)
 
+> ⚠️ **Note:** The deployment may take some time to load initially because the backend is hosted on **Render**, which can take a while to spin up if inactive.
+
 ---
 
 ## 🚀 Tech Stack
