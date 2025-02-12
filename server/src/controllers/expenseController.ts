@@ -1,3 +1,4 @@
+// Main controller for handling expense tracking operations and financial data management
 import { Request, Response } from "express";
 import prisma from "../config/db";
 import PDFDocument from "pdfkit";
@@ -7,8 +8,9 @@ interface AuthenticatedRequest extends Request {
   userId?: number;
 }
 
-
 const PAGE_LIMIT = 2000; // Process data in chunks
+
+// Handles creation of new expenses with validation and user association
 
 export const addExpense = async (
   req: AuthenticatedRequest,
@@ -48,6 +50,8 @@ export const addExpense = async (
   }
 };
 
+// Manages income entries with amount validation and user-specific storage
+
 export const addIncome = async (
   req: AuthenticatedRequest,
   res: Response
@@ -81,6 +85,8 @@ export const addIncome = async (
       .json({ message: "Something went wrong while adding income" });
   }
 };
+
+// Retrieves financial data for dashboard, including expense categories and income sources
 
 export const getFinancialSummary = async (
   req: AuthenticatedRequest,
@@ -126,7 +132,7 @@ export const getFinancialSummary = async (
 
     const formattedIncome = incomeBySource.map((item) => ({
       name: item.source,
-      value: item._sum.amount || 0, // Ensure value is not undefined
+      value: item._sum.amount || 0, // Ensures value is not undefined
     }));
 
     res.status(200).json({
@@ -145,6 +151,8 @@ export const getFinancialSummary = async (
       .json({ message: "Something went wrong while fetching summary" });
   }
 };
+
+// Fetches paginated expense records with filtering capabilities
 
 export const getExpenses = async (
   req: AuthenticatedRequest,
@@ -181,6 +189,8 @@ export const getExpenses = async (
   }
 };
 
+// Fetches income records for the authenticated user
+
 export const getIncomes = async (
   req: AuthenticatedRequest,
   res: Response
@@ -204,7 +214,8 @@ export const getIncomes = async (
   }
 };
 
-// Deletion endpoints
+// Handles secure deletion of expense records with user verification
+
 export const deleteExpense = async (
   req: AuthenticatedRequest,
   res: Response
@@ -238,6 +249,8 @@ export const deleteExpense = async (
   }
 };
 
+// Handles secure deletion of income records with user verification
+
 export const deleteIncome = async (
   req: AuthenticatedRequest,
   res: Response
@@ -268,151 +281,5 @@ export const deleteIncome = async (
     res
       .status(500)
       .json({ message: "Something went wrong while deleting income" });
-  }
-};
-
-export const exportToPdf = async (
-  req: AuthenticatedRequest,
-  res: Response
-): Promise<void> => {
-  const userId = req.userId;
-
-  try {
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader(
-      "Content-Disposition",
-      "attachment; filename=financial-report.pdf"
-    );
-
-    const doc = new PDFDocument({ margin: 50, size: "A4" });
-    doc.pipe(res);
-
-    // Header (Stays on the first page)
-    doc
-      .fontSize(24)
-      .font("Helvetica-Bold")
-      .text("Financial Report", { align: "center" });
-    doc.moveDown();
-
-    // Financial Summary (Will be compact, no extra page break)
-    const [totalIncome, totalExpenses] = await Promise.all([
-      prisma.income.aggregate({ _sum: { amount: true }, where: { userId } }),
-      prisma.expense.aggregate({ _sum: { amount: true }, where: { userId } }),
-    ]);
-
-    const balance =
-      (totalIncome._sum.amount || 0) - (totalExpenses._sum.amount || 0);
-
-    doc
-      .fontSize(16)
-      .font("Helvetica-Bold")
-      .text("Financial Summary")
-      .moveDown(0.5);
-    doc
-      .fontSize(12)
-      .font("Helvetica")
-      .text(`Total Income: $${(totalIncome._sum.amount || 0).toFixed(2)}`)
-      .text(`Total Expenses: $${(totalExpenses._sum.amount || 0).toFixed(2)}`)
-      .text(`Current Balance: $${balance.toFixed(2)}`);
-    doc.moveDown(1.5); // Gives spacing before income/expense details
-
-    // Optimized function for Income/Expense
-    const addPaginatedData = async (
-      title: string,
-      model: "income" | "expense",
-      formatItem: (item: any, index: number) => string
-    ) => {
-      doc.fontSize(14).font("Helvetica-Bold").text(title).moveDown(0.5);
-
-      let lastCreatedAt: Date | null = null;
-      let lastId: number | null = null;
-      let indexCounter = 1;
-
-      while (true) {
-        const whereClause: any = { userId };
-        if (lastCreatedAt && lastId) {
-          whereClause.OR = [
-            { createdAt: { lt: lastCreatedAt } },
-            {
-              AND: [{ createdAt: lastCreatedAt }, { id: { gt: lastId } }],
-            },
-          ];
-        }
-
-        const data = await (prisma as any)[model].findMany({
-          where: whereClause,
-          orderBy: [{ createdAt: "desc" }, { id: "asc" }],
-          take: PAGE_LIMIT,
-          select: {
-            id: true,
-            amount: true,
-            createdAt: true,
-            ...(model === "income" ? { source: true } : { category: true }),
-          },
-        });
-
-        if (data.length === 0) break;
-
-        // Improved layout: Tabular formatting for clarity
-        data.forEach((item: any) => {
-          if (doc.y > 700) doc.addPage();
-          doc
-            .fontSize(10)
-            .font("Helvetica")
-            .text(formatItem(item, indexCounter));
-          indexCounter++;
-        });
-
-        const lastItem = data[data.length - 1];
-        lastCreatedAt = lastItem.createdAt;
-        lastId = lastItem.id;
-
-        if (data.length < PAGE_LIMIT) break;
-      }
-
-      doc.moveDown(1); // Extra spacing after each section
-    };
-
-    // Adding Income & Expense Data
-    await addPaginatedData(
-      "Income Breakdown",
-      "income",
-      (income, index) =>
-        `${index}. $${income.amount.toFixed(
-          2
-        )} - ${income.source?.toUpperCase()} (${new Date(
-          income.createdAt
-        ).toLocaleDateString()})`
-    );
-
-    await addPaginatedData(
-      "Expense Breakdown",
-      "expense",
-      (expense, index) =>
-        `${index}. $${expense.amount.toFixed(
-          2
-        )} - ${expense.category?.toUpperCase()} (${new Date(
-          expense.createdAt
-        ).toLocaleDateString()})`
-    );
-
-    // Footer (Only at the bottom of the last page)
-    doc
-      .fontSize(8)
-      .font("Helvetica")
-      .text(
-        "This report was generated automatically by the Expense Tracker system.",
-        50,
-        doc.page.height - 50,
-        { align: "center" }
-      );
-
-    doc.end();
-  } catch (error) {
-    console.error("PDF export error:", error);
-    res.status(500).json({
-      message: "Something went wrong while generating PDF",
-      error: error instanceof Error ? error.message : "Unknown error",
-    });
   }
 };

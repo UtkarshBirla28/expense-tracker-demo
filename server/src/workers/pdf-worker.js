@@ -21,7 +21,7 @@ const { userId, model, offset, limit } = workerData;
           : { id: true, amount: true, createdAt: true, category: true },
     });
 
-    // Create a PDF chunk for this batch
+    // Created a PDF chunk for this batch
     const doc = new PDFDocument({ margin: 50, size: "A4" });
     const tempDir = path.join(__dirname, "../temp");
     if (!fs.existsSync(tempDir)) {
@@ -31,7 +31,7 @@ const { userId, model, offset, limit } = workerData;
     const writeStream = fs.createWriteStream(filePath);
     doc.pipe(writeStream);
 
-    // Write a small header for this chunk
+   // small header for this chunk
     doc.fontSize(14)
       .font("Helvetica-Bold")
       .text(
