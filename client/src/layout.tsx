@@ -45,7 +45,7 @@ function Layout({ children }: { children: React.ReactNode }) {
       {/* Mobile Sidebar */}
       {isMobile && (
         <Sheet open={openMobile} onOpenChange={setOpenMobile}>
-          <SheetContent side="left" className="w-64 p-0">
+          <SheetContent side="left" className="w-64 p-0 bg-white">
             <SidebarContent>
               {sidebarContent}
             </SidebarContent>
