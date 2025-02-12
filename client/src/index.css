@@ -1,0 +1,5 @@
+@import "tailwindcss"; /* Import must be at the top */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
