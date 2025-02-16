@@ -1,4 +1,3 @@
-// workers/pdfWorker.js
 import { parentPort, workerData } from "worker_threads";
 import PDFDocument from "pdfkit";
 import prisma from "../config/db";
@@ -31,13 +30,13 @@ const { userId, model, offset, limit } = workerData;
     const writeStream = fs.createWriteStream(filePath);
     doc.pipe(writeStream);
 
-   // small header for this chunk
-    doc.fontSize(14)
+    // small header for this chunk
+    doc
+      .fontSize(14)
       .font("Helvetica-Bold")
-      .text(
-        `${model.toUpperCase()} Details (Batch starting at ${offset})`,
-        { align: "center" }
-      );
+      .text(`${model.toUpperCase()} Details (Batch starting at ${offset})`, {
+        align: "center",
+      });
     doc.moveDown();
 
     // List each transaction with simple formatting

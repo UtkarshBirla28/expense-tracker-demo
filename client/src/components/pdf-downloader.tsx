@@ -1,5 +1,3 @@
-"use client"
-
 import type React from "react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -7,7 +5,7 @@ import { ArrowDownTrayIcon } from "@heroicons/react/24/solid"
 import usePdfDownload from "@/hooks/use-pdf-download"
 
 const PdfDownloader: React.FC = () => {
-    const { downloadPdf } = usePdfDownload()
+  const { downloadPdf } = usePdfDownload()
   const [isLoading, setIsLoading] = useState(false)
 
   const handleDownload = async () => {

@@ -8,7 +8,7 @@ interface AuthenticatedRequest extends Request {
   userId?: number;
 }
 
-const PAGE_LIMIT = 2000; // Process data in chunks
+ // Process data in chunks
 
 // Handles creation of new expenses with validation and user association
 

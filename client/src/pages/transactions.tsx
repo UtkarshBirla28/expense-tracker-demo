@@ -1,5 +1,3 @@
-"use client"
-
 import { useEffect, useState } from "react"
 import type { Expense, Income } from "@/types"
 import AddTransactionForm from "@/components/add-transaction-form"
@@ -92,16 +90,16 @@ export default function TransactionsPage() {
             <div className="space-y-8">
               <div>
                 <h4 className="text-xl font-semibold mb-2">Expenses</h4>
-                <ExpenseList 
-                  expenses={expenses} 
+                <ExpenseList
+                  expenses={expenses}
                   onDelete={handleDeleteExpense}
                   isLoading={isLoading}
                 />
               </div>
               <div>
                 <h4 className="text-xl font-semibold mb-2">Incomes</h4>
-                <IncomeList 
-                  incomes={incomes} 
+                <IncomeList
+                  incomes={incomes}
                   onDelete={handleDeleteIncome}
                   isLoading={isLoading}
                 />
