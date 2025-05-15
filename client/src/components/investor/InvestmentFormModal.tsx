@@ -55,7 +55,7 @@ export function InvestmentFormModal({ isOpen, onClose }: InvestmentFormModalProp
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md focus:outline-none focus:ring-0">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Investment Profile</DialogTitle>
         </DialogHeader>
