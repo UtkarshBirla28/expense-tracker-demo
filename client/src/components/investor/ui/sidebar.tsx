@@ -1,9 +1,7 @@
-"use client"
-
-import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { type VariantProps, cva } from "class-variance-authority"
 import { PanelLeft } from "lucide-react"
+import * as React from "react"
 
 import { cn } from "../../../lib/utils"
 import { Button } from "./button"
@@ -648,5 +646,5 @@ export {
   SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
-  useSidebar,
+  useSidebar
 }

@@ -1,9 +1,7 @@
-"use client"
-
 import type React from "react"
-import { SidebarProvider, useSidebar } from "./ui/sidebar"
 import { AppSidebar } from "./AppSidebar"
 import { Sheet, SheetContent } from "./ui/sheet"
+import { SidebarProvider, useSidebar } from "./ui/sidebar"
 
 interface LayoutProps {
   children: React.ReactNode
