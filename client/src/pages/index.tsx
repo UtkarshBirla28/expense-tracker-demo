@@ -1,25 +1,19 @@
-import useSummary from "@/hooks/use-summary";
-import {
-  ArrowDownIcon,
-  ArrowUpIcon,
-  ScaleIcon,
-  PlusCircleIcon,
-} from "@heroicons/react/24/solid";
-import type React from "react";
-import { useCallback, useEffect, useState } from "react";
-import { Cell, Legend, Pie, PieChart, ResponsiveContainer } from "recharts";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowDownLeft, ArrowUpRight, PlusCircle, Scale } from "lucide-react";
 import RootLayout from "../layout";
 import PdfDownloader from "@/components/pdf-downloader";
-import { useNavigate } from "react-router-dom";
-
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
+import useSummary from "@/hooks/use-summary";
+import { formatCurrency } from "@/lib/format";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 interface ExpenseCategory {
-  category: string;
-  _sum: {
-    amount: number;
-  };
+  name: string;
+  value: number;
 }
+
+const MAX_CATEGORY_ROWS = 7;
 
 export default function Home() {
   const navigate = useNavigate();
@@ -27,11 +21,11 @@ export default function Home() {
   const [expenses, setExpenses] = useState<number>(0);
   const [incomes, setIncomes] = useState<number>(0);
   const [currentBalance, setCurrentBalance] = useState<number>(0);
-  const [expensesByCategory, setExpensesByCategory] = useState<
-    ExpenseCategory[]
-  >([]);
+  const [expensesByCategory, setExpensesByCategory] = useState<ExpenseCategory[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
+    setIsLoading(true);
     const response = await getSummary();
     if (response) {
       setExpenses(response.summary.totalExpenses);
@@ -39,118 +33,163 @@ export default function Home() {
       setCurrentBalance(response.summary.currentBalance);
       setExpensesByCategory(response.expensesByCategory);
     }
-  }, [setExpenses, setIncomes, setCurrentBalance, setExpensesByCategory]);
+    setIsLoading(false);
+  }, []);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
+  const sorted = [...(expensesByCategory ?? [])].sort(
+    (a, b) => (b.value ?? 0) - (a.value ?? 0)
+  );
+  const top = sorted.slice(0, MAX_CATEGORY_ROWS);
+  const restTotal = sorted
+    .slice(MAX_CATEGORY_ROWS)
+    .reduce((sum, c) => sum + (c.value ?? 0), 0);
+  const rows = [
+    ...top.map((c) => ({ name: c.name, amount: c.value ?? 0 })),
+    ...(restTotal > 0 ? [{ name: "Other", amount: restTotal }] : []),
+  ];
+  const categoryTotal = rows.reduce((sum, r) => sum + r.amount, 0);
+  const maxAmount = rows.length > 0 ? Math.max(...rows.map((r) => r.amount)) : 0;
+
   return (
     <RootLayout>
-      <div className="py-8 w-full">
-        <h2 className="text-3xl font-bold text-center mb-8">
-          Financial Overview
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 mb-8">
-          <SummaryCard
-            title="Total Income"
-            amount={incomes}
-            icon={<ArrowUpIcon className="h-8 w-8 text-green-500" />}
-            color="bg-green-100"
-          />
-          <SummaryCard
-            title="Total Expenses"
-            amount={expenses}
-            icon={<ArrowDownIcon className="h-8 w-8 text-red-500" />}
-            color="bg-red-100"
-          />
-          <SummaryCard
-            title="Balance"
-            amount={currentBalance}
-            icon={<ScaleIcon className="h-8 w-8 text-blue-500" />}
-            color="bg-blue-100"
-          />
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Overview</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Your money at a glance.
+          </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-2xl font-semibold mb-4">Spending Breakdown</h3>
-          <div className="h-80">
-            {expensesByCategory?.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={expensesByCategory}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                    label={({ name, percent }) =>
-                      `${name} ${(percent * 100).toFixed(0)}%`
-                    }
-                  >
-                    {expensesByCategory.map(
-                      (_: ExpenseCategory, index: number) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      )
-                    )}
-                  </Pie>
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center">
-                <div className="text-center">
-                  <PlusCircleIcon
-                    className="h-16 w-16 text-gray-400 mx-auto mb-4 hover:text-gray-600"
-                    onClick={() => navigate("/transactions")}
-                  />
-                  <h3 className="text-lg font-medium text-gray-900 mb-1">
-                    No expenses yet
-                  </h3>
-                  <p className="text-gray-500 mb-4">
-                    Add your first expense to see your spending breakdown
-                  </p>
-                  {/* <button 
-                  onClick={() => navigate('/transactions')}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-black bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-                >
-                  Add Expense
-                </button> */}
-                </div>
-              </div>
-            )}
-          </div>
-          <PdfDownloader />
-        </div>
+        <PdfDownloader />
       </div>
+
+      {/* KPI tiles */}
+      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <StatTile
+          label="Total income"
+          amount={incomes}
+          isLoading={isLoading}
+          icon={<ArrowDownLeft className="h-4.5 w-4.5" strokeWidth={2.2} />}
+          chipClass="bg-positive-soft text-positive"
+        />
+        <StatTile
+          label="Total expenses"
+          amount={expenses}
+          isLoading={isLoading}
+          icon={<ArrowUpRight className="h-4.5 w-4.5" strokeWidth={2.2} />}
+          chipClass="bg-negative-soft text-negative"
+        />
+        <StatTile
+          label="Balance"
+          amount={currentBalance}
+          isLoading={isLoading}
+          icon={<Scale className="h-4.5 w-4.5" strokeWidth={2.2} />}
+          chipClass="bg-primary/10 text-primary"
+          valueClass={currentBalance < 0 ? "text-negative" : undefined}
+        />
+      </div>
+
+      {/* Spending by category */}
+      <section className="mt-6 rounded-xl border border-border bg-card p-6 shadow-sm">
+        <div className="flex items-baseline justify-between gap-4">
+          <h2 className="text-base font-semibold tracking-tight">
+            Spending by category
+          </h2>
+          {rows.length > 0 && (
+            <p className="text-sm text-muted-foreground">
+              {formatCurrency(categoryTotal)} total
+            </p>
+          )}
+        </div>
+
+        {isLoading ? (
+          <div className="mt-6 space-y-5">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="space-y-2">
+                <div className="flex justify-between">
+                  <Skeleton className="h-4 w-28" />
+                  <Skeleton className="h-4 w-20" />
+                </div>
+                <Skeleton className="h-2 w-full rounded-full" />
+              </div>
+            ))}
+          </div>
+        ) : rows.length > 0 ? (
+          <ul className="mt-6 space-y-5">
+            {rows.map((row) => {
+              const share = categoryTotal > 0 ? row.amount / categoryTotal : 0;
+              const width = maxAmount > 0 ? (row.amount / maxAmount) * 100 : 0;
+              return (
+                <li key={row.name}>
+                  <div className="flex items-baseline justify-between gap-4">
+                    <p className="text-sm font-medium capitalize">{row.name}</p>
+                    <p className="text-sm tabular-nums">
+                      <span className="font-medium">{formatCurrency(row.amount)}</span>
+                      <span className="ml-2 text-muted-foreground">
+                        {Math.round(share * 100)}%
+                      </span>
+                    </p>
+                  </div>
+                  <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full bg-primary transition-[width] duration-500"
+                      style={{ width: `${Math.max(width, 2)}%` }}
+                    />
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <div className="flex flex-col items-center py-14 text-center">
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+              <PlusCircle className="h-6 w-6" />
+            </span>
+            <h3 className="mt-4 text-sm font-semibold">No expenses yet</h3>
+            <p className="mt-1 max-w-xs text-sm text-muted-foreground">
+              Add your first expense to see your spending breakdown.
+            </p>
+            <button
+              onClick={() => navigate("/transactions")}
+              className="mt-5 inline-flex h-9 items-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover"
+            >
+              Add a transaction
+            </button>
+          </div>
+        )}
+      </section>
     </RootLayout>
   );
 }
 
-interface SummaryCardProps {
-  title: string;
+interface StatTileProps {
+  label: string;
   amount: number;
-  icon: React.ReactNode;
-  color: string;
+  icon: ReactNode;
+  chipClass: string;
+  valueClass?: string;
+  isLoading: boolean;
 }
 
-const SummaryCard: React.FC<SummaryCardProps> = ({
-  title,
-  amount,
-  icon,
-  color,
-}) => {
+function StatTile({ label, amount, icon, chipClass, valueClass, isLoading }: StatTileProps) {
   return (
-    <div className={`${color} rounded-lg shadow p-6`}>
+    <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-semibold">{title}</h3>
-        {icon}
+        <p className="text-[13px] font-medium text-muted-foreground">{label}</p>
+        <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg", chipClass)}>
+          {icon}
+        </span>
       </div>
-      <p className="text-3xl font-bold mt-4">${amount}</p>
+      {isLoading ? (
+        <Skeleton className="mt-3 h-8 w-32" />
+      ) : (
+        <p className={cn("mt-3 text-[28px] font-semibold leading-none tracking-tight", valueClass)}>
+          {formatCurrency(amount)}
+        </p>
+      )}
     </div>
   );
-};
+}

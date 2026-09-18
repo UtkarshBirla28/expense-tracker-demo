@@ -78,34 +78,28 @@ export default function TransactionsPage() {
 
   return (
     <RootLayout>
-      <div className="py-8">
-        <h2 className="text-3xl font-bold text-center mb-8">Transactions</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div>
-            <h3 className="text-2xl font-semibold mb-4">Add Transaction</h3>
-            <AddTransactionForm onSubmit={handleAddTransaction} />
-          </div>
-          <div>
-            <h3 className="text-2xl font-semibold mb-4">Recent Transactions</h3>
-            <div className="space-y-8">
-              <div>
-                <h4 className="text-xl font-semibold mb-2">Expenses</h4>
-                <ExpenseList
-                  expenses={expenses}
-                  onDelete={handleDeleteExpense}
-                  isLoading={isLoading}
-                />
-              </div>
-              <div>
-                <h4 className="text-xl font-semibold mb-2">Incomes</h4>
-                <IncomeList
-                  incomes={incomes}
-                  onDelete={handleDeleteIncome}
-                  isLoading={isLoading}
-                />
-              </div>
-            </div>
-          </div>
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight">Transactions</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Record what comes in and what goes out.
+        </p>
+      </div>
+
+      <div className="mt-8 grid grid-cols-1 items-start gap-6 lg:grid-cols-5">
+        <div className="lg:sticky lg:top-8 lg:col-span-2">
+          <AddTransactionForm onSubmit={handleAddTransaction} />
+        </div>
+        <div className="space-y-6 lg:col-span-3">
+          <ExpenseList
+            expenses={expenses}
+            onDelete={handleDeleteExpense}
+            isLoading={isLoading}
+          />
+          <IncomeList
+            incomes={incomes}
+            onDelete={handleDeleteIncome}
+            isLoading={isLoading}
+          />
         </div>
       </div>
     </RootLayout>

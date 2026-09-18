@@ -1,11 +1,18 @@
-import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { zodResolver } from "@hookform/resolvers/zod"
-import type { FC } from 'react'
+import type { FC } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
+import { Loader2 } from "lucide-react"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
 
 const transactionSchema = z.object({
   type: z.enum(["expense", "income"]),
@@ -31,42 +38,61 @@ const AddTransactionForm: FC<AddTransactionFormProps> = ({ onSubmit }) => {
     },
   })
 
+  const type = form.watch("type")
+  const isSubmitting = form.formState.isSubmitting
+
   const handleSubmit = async (data: TransactionFormValues) => {
     try {
       await onSubmit(data)
-      
-      // Reset form after successful submission
       form.reset({
-        type: "expense",
+        type: data.type,
         amount: 0,
         category: "",
         description: "",
       })
     } catch (error) {
-      console.error('Failed to submit transaction:', error)
+      console.error("Failed to submit transaction:", error)
     }
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 bg-white shadow rounded-lg p-6">
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className="space-y-5 rounded-xl border border-border bg-card p-6 shadow-sm"
+      >
+        {/* Segmented type control */}
         <FormField
           control={form.control}
           name="type"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select transaction type" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="expense">Expense</SelectItem>
-                  <SelectItem value="income">Income</SelectItem>
-                </SelectContent>
-              </Select>
+              <FormControl>
+                <div
+                  role="tablist"
+                  className="grid grid-cols-2 gap-1 rounded-lg bg-muted p-1"
+                >
+                  {(["expense", "income"] as const).map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      role="tab"
+                      aria-selected={field.value === value}
+                      onClick={() => field.onChange(value)}
+                      className={cn(
+                        "h-8 rounded-md text-sm font-medium capitalize transition-all",
+                        field.value === value
+                          ? value === "expense"
+                            ? "bg-card text-negative shadow-sm"
+                            : "bg-card text-positive shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      {value}
+                    </button>
+                  ))}
+                </div>
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -77,14 +103,25 @@ const AddTransactionForm: FC<AddTransactionFormProps> = ({ onSubmit }) => {
           name="amount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Amount</FormLabel>
+              <FormLabel className="text-[13px] font-medium text-ink-secondary">
+                Amount
+              </FormLabel>
               <FormControl>
-                <Input 
-                  type="number" 
-                  placeholder="Enter amount" 
-                  {...field}
-                  onChange={e => field.onChange(parseFloat(e.target.value))}
-                />
+                <div className="relative">
+                  <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-muted-foreground">
+                    $
+                  </span>
+                  <Input
+                    type="number"
+                    inputMode="decimal"
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                    className="h-10 pl-7 tabular-nums"
+                    value={field.value || ""}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                  />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -96,9 +133,19 @@ const AddTransactionForm: FC<AddTransactionFormProps> = ({ onSubmit }) => {
           name="category"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{form.watch("type") === "expense" ? "Category" : "Source"}</FormLabel>
+              <FormLabel className="text-[13px] font-medium text-ink-secondary">
+                {type === "expense" ? "Category" : "Source"}
+              </FormLabel>
               <FormControl>
-                <Input placeholder={`Enter ${form.watch("type") === "expense" ? "category" : "source"}`} {...field} />
+                <Input
+                  placeholder={
+                    type === "expense"
+                      ? "e.g. groceries, rent, travel"
+                      : "e.g. salary, freelance"
+                  }
+                  className="h-10"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -110,18 +157,29 @@ const AddTransactionForm: FC<AddTransactionFormProps> = ({ onSubmit }) => {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel className="text-[13px] font-medium text-ink-secondary">
+                Description
+              </FormLabel>
               <FormControl>
-                <Input placeholder="Enter description" {...field} />
+                <Input placeholder="What was it for?" className="h-10" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <Button type="submit" className="w-full">
-          Add Transaction
-        </Button>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover disabled:pointer-events-none disabled:opacity-60"
+        >
+          {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
+          {isSubmitting
+            ? "Adding…"
+            : type === "expense"
+              ? "Add expense"
+              : "Add income"}
+        </button>
       </form>
     </Form>
   )

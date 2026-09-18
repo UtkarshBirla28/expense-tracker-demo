@@ -1,4 +1,9 @@
-import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Loader2, Wallet } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -8,13 +13,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
 import useSignIn from "@/hooks/use-sign-in";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import * as z from "zod";
 
 const signinSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
@@ -42,34 +41,43 @@ export default function SigninPage() {
   }, [navigate, onSuccess]);
 
   const onSubmit = async (data: SigninFormValues) => {
-    console.log(data);
     await signIn(data);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Expense Tracker</h1>
-          <h2 className="text-2xl font-bold text-gray-700">Sign In</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Don't have an account?{" "}
-            <Link to="/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
-              Sign up
-            </Link>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12">
+      <div className="w-full max-w-sm">
+        <div className="flex flex-col items-center text-center">
+          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
+            <Wallet className="h-6 w-6" strokeWidth={2.2} />
+          </span>
+          <h1 className="mt-4 text-xl font-semibold tracking-tight">
+            Welcome back
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Sign in to your Expense Tracker account
           </p>
         </div>
-        <div className="bg-white p-8 rounded-lg shadow-md">
+
+        <div className="mt-8 rounded-xl border border-border bg-card p-6 shadow-sm">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel className="text-[13px] font-medium text-ink-secondary">
+                      Email
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your email" {...field} />
+                      <Input
+                        type="email"
+                        autoComplete="email"
+                        placeholder="you@example.com"
+                        className="h-10"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -80,11 +88,15 @@ export default function SigninPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel className="text-[13px] font-medium text-ink-secondary">
+                      Password
+                    </FormLabel>
                     <FormControl>
                       <Input
                         type="password"
-                        placeholder="Enter your password"
+                        autoComplete="current-password"
+                        placeholder="••••••••"
+                        className="h-10"
                         {...field}
                       />
                     </FormControl>
@@ -92,16 +104,31 @@ export default function SigninPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full" variant={"outline"}>
-                {loading ? "Signing In..." : "Sign In"}
-              </Button>
-              {error && <p className="text-red-500 mt-2">{error}</p>}
-              {onSuccess && (
-                <p className="text-green-500 mt-2">SignIn Successful!</p>
+
+              {error && (
+                <p className="rounded-lg bg-negative-soft px-3 py-2 text-sm text-negative">
+                  {error}
+                </p>
               )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover disabled:pointer-events-none disabled:opacity-60"
+              >
+                {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+                {loading ? "Signing in…" : "Sign in"}
+              </button>
             </form>
           </Form>
         </div>
+
+        <p className="mt-6 text-center text-sm text-muted-foreground">
+          Don&apos;t have an account?{" "}
+          <Link to="/signup" className="font-medium text-primary hover:underline">
+            Sign up
+          </Link>
+        </p>
       </div>
     </div>
   );

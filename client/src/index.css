@@ -1,5 +1,72 @@
-@import "tailwindcss"; /* Import must be at the top */
+@import "tailwindcss";
+@plugin "tailwindcss-animate";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/*
+ * Design tokens — light theme.
+ * Palette: dataviz reference instance (validated for contrast + CVD).
+ */
+@theme {
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Surfaces & ink */
+  --color-background: #f9f9f7;
+  --color-foreground: #0b0b0b;
+  --color-card: #fcfcfb;
+  --color-card-foreground: #0b0b0b;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #0b0b0b;
+
+  /* Brand */
+  --color-primary: #2a78d6;
+  --color-primary-hover: #256abf;
+  --color-primary-foreground: #ffffff;
+
+  /* Neutrals */
+  --color-secondary: #f0efec;
+  --color-secondary-foreground: #0b0b0b;
+  --color-muted: #f0efec;
+  --color-muted-foreground: #6f6e69;
+  --color-accent: #f0efec;
+  --color-accent-foreground: #0b0b0b;
+  --color-ink-secondary: #52514e;
+
+  /* Semantic */
+  --color-destructive: #d03b3b;
+  --color-destructive-foreground: #ffffff;
+  --color-positive: #006300;
+  --color-positive-soft: #e6f2e6;
+  --color-negative: #d03b3b;
+  --color-negative-soft: #fbeaea;
+
+  /* Chrome */
+  --color-border: #e1e0d9;
+  --color-input: #d6d5cd;
+  --color-ring: #2a78d6;
+
+  --radius-lg: 0.75rem;
+  --radius-md: 0.625rem;
+  --radius-sm: 0.5rem;
+}
+
+/* shadcn components reference --radius directly */
+:root {
+  --radius: 0.625rem;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11";
+  }
+}
