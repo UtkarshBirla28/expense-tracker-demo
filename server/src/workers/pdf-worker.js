@@ -43,14 +43,14 @@ const { userId, model, offset, limit } = workerData;
     transactions.forEach((txn, index) => {
       let line;
       if (model === "income") {
-        line = `${offset + index + 1}. $${txn.amount.toFixed(
-          2
+        line = `${offset + index + 1}. Rs. ${txn.amount.toLocaleString(
+          "en-IN"
         )} - ${txn.source.toUpperCase()} (${new Date(
           txn.createdAt
         ).toLocaleDateString()})`;
       } else {
-        line = `${offset + index + 1}. $${txn.amount.toFixed(
-          2
+        line = `${offset + index + 1}. Rs. ${txn.amount.toLocaleString(
+          "en-IN"
         )} - ${txn.category.toUpperCase()} (${new Date(
           txn.createdAt
         ).toLocaleDateString()})`;

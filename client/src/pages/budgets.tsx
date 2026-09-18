@@ -68,7 +68,7 @@ export default function BudgetsPage() {
 
   return (
     <RootLayout>
-      <div>
+      <div className="animate-rise">
         <h1 className="text-2xl font-semibold tracking-tight">Budgets</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Set a monthly limit per category. Spending resets each month.
@@ -78,7 +78,8 @@ export default function BudgetsPage() {
       {/* Set a budget */}
       <form
         onSubmit={handleSave}
-        className="mt-8 rounded-xl border border-border bg-card p-5 shadow-sm"
+        className="animate-rise mt-8 rounded-xl border border-border bg-card p-5 shadow-sm"
+        style={{ animationDelay: "100ms" }}
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
           <div className="flex-1">
@@ -98,7 +99,7 @@ export default function BudgetsPage() {
             </label>
             <div className="relative">
               <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-muted-foreground">
-                $
+                ₹
               </span>
               <Input
                 type="number"
@@ -128,7 +129,10 @@ export default function BudgetsPage() {
       </form>
 
       {/* Budget list */}
-      <section className="mt-6 rounded-xl border border-border bg-card p-6 shadow-sm">
+      <section
+        className="animate-rise mt-6 rounded-xl border border-border bg-card p-6 shadow-sm"
+        style={{ animationDelay: "180ms" }}
+      >
         <h2 className="text-base font-semibold tracking-tight">This month</h2>
 
         {isLoading ? (

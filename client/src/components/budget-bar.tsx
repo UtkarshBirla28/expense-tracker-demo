@@ -38,7 +38,7 @@ const BudgetBar: FC<BudgetBarProps> = ({ budget, compact = false }) => {
       </div>
       <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-muted">
         <div
-          className="h-full rounded-full transition-[width] duration-500"
+          className="animate-grow-x h-full rounded-full"
           style={{
             width: `${Math.min(ratio * 100, 100)}%`,
             backgroundColor: barColor,

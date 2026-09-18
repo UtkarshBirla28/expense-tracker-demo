@@ -92,10 +92,11 @@ const TransactionList: FC<TransactionListProps> = ({
   return (
     <ListShell title={title} count={rows.length}>
       <ul className="max-h-96 divide-y divide-border overflow-y-auto">
-        {rows.map((row) => (
+        {rows.map((row, index) => (
           <li
             key={row.id}
-            className="group flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-muted/50"
+            className="animate-fade-in group flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-muted/50"
+            style={{ animationDelay: `${Math.min(index, 8) * 50}ms` }}
           >
             <span
               className={cn(

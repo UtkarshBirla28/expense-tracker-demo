@@ -24,7 +24,7 @@ const NAV_ITEMS = [
 function Brand() {
   return (
     <div className="flex items-center gap-2.5">
-      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+      <span className="animate-pop flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm transition-transform hover:rotate-6">
         <Wallet className="h-[18px] w-[18px]" strokeWidth={2.2} />
       </span>
       <div className="leading-tight">
@@ -110,10 +110,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       {mobileOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div
-            className="absolute inset-0 bg-foreground/30"
+            className="animate-fade-in absolute inset-0 bg-foreground/30"
             onClick={() => setMobileOpen(false)}
           />
-          <div className="absolute inset-y-0 left-0 flex w-72 flex-col bg-card px-4 py-6 shadow-xl">
+          <div className="animate-slide-in-left absolute inset-y-0 left-0 flex w-72 flex-col bg-card px-4 py-6 shadow-xl">
             <div className="flex items-center justify-between">
               <Brand />
               <button

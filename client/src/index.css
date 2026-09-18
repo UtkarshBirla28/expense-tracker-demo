@@ -53,6 +53,146 @@
   --radius: 0.625rem;
 }
 
+/* ── Motion ─────────────────────────────────────────────── */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  60% {
+    transform: scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes grow-y {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+
+.animate-rise {
+  animation: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-pop {
+  animation: pop 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-grow-x {
+  transform-origin: left center;
+  animation: grow-x 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-grow-y {
+  transform-origin: bottom center;
+  animation: grow-y 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.25s ease-out both;
+}
+
+/* Interactive card lift */
+.card-lift {
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.card-lift:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 6px 16px -6px rgba(11, 11, 11, 0.12),
+    0 2px 6px -2px rgba(11, 11, 11, 0.06);
+}
+
+/* Button press feedback */
+.press {
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.press:active {
+  transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise,
+  .animate-pop,
+  .animate-grow-x,
+  .animate-grow-y,
+  .animate-slide-in-left,
+  .animate-fade-in {
+    animation: none;
+  }
+  .card-lift,
+  .card-lift:hover,
+  .press:active {
+    transform: none;
+    transition: none;
+  }
+}
+
 @layer base {
   * {
     border-color: var(--color-border);

@@ -101,7 +101,7 @@ export default function TransactionsPage() {
 
   return (
     <RootLayout>
-      <div>
+      <div className="animate-rise">
         <h1 className="text-2xl font-semibold tracking-tight">Transactions</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Record what comes in and what goes out.
@@ -109,14 +109,14 @@ export default function TransactionsPage() {
       </div>
 
       <div className="mt-8 grid grid-cols-1 items-start gap-6 lg:grid-cols-5">
-        <div className="lg:sticky lg:top-8 lg:col-span-2">
+        <div className="animate-rise lg:sticky lg:top-8 lg:col-span-2" style={{ animationDelay: "100ms" }}>
           <AddTransactionForm
             onSubmit={handleAddTransaction}
             editing={editing}
             onCancelEdit={() => setEditing(null)}
           />
         </div>
-        <div className="space-y-6 lg:col-span-3">
+        <div className="animate-rise space-y-6 lg:col-span-3" style={{ animationDelay: "180ms" }}>
           <ExpenseList
             expenses={expenses}
             onDelete={handleDeleteExpense}

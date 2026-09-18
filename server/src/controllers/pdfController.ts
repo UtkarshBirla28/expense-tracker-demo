@@ -36,9 +36,9 @@ const generateHeaderPdf = async (summaryData: any) => {
     doc
       .fontSize(12)
       .font("Helvetica")
-      .text(`Total Income: $${summaryData.totalIncome.toFixed(2)}`)
-      .text(`Total Expenses: $${summaryData.totalExpenses.toFixed(2)}`)
-      .text(`Current Balance: $${summaryData.balance.toFixed(2)}`);
+      .text(`Total Income: Rs. ${summaryData.totalIncome.toLocaleString("en-IN")}`)
+      .text(`Total Expenses: Rs. ${summaryData.totalExpenses.toLocaleString("en-IN")}`)
+      .text(`Current Balance: Rs. ${summaryData.balance.toLocaleString("en-IN")}`);
     doc.moveDown(1);
     doc.end();
 

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Loader2, Wallet } from "lucide-react";
+import { Loader2, Sparkles, Wallet } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -21,6 +21,9 @@ const signinSchema = z.object({
 });
 
 export type SigninFormValues = z.infer<typeof signinSchema>;
+
+const DEMO_EMAIL = "demo@expensetracker.in";
+const DEMO_PASSWORD = "demo1234";
 
 export default function SigninPage() {
   const navigate = useNavigate();
@@ -47,8 +50,8 @@ export default function SigninPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-sm">
-        <div className="flex flex-col items-center text-center">
-          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
+        <div className="animate-rise flex flex-col items-center text-center">
+          <span className="animate-pop flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
             <Wallet className="h-6 w-6" strokeWidth={2.2} />
           </span>
           <h1 className="mt-4 text-xl font-semibold tracking-tight">
@@ -59,7 +62,10 @@ export default function SigninPage() {
           </p>
         </div>
 
-        <div className="mt-8 rounded-xl border border-border bg-card p-6 shadow-sm">
+        <div
+          className="animate-rise mt-8 rounded-xl border border-border bg-card p-6 shadow-sm"
+          style={{ animationDelay: "120ms" }}
+        >
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
@@ -114,13 +120,44 @@ export default function SigninPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover disabled:pointer-events-none disabled:opacity-60"
+                className="press inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover disabled:pointer-events-none disabled:opacity-60"
               >
                 {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                 {loading ? "Signing in…" : "Sign in"}
               </button>
             </form>
           </Form>
+        </div>
+
+        {/* Demo account for visitors/recruiters */}
+        <div
+          className="animate-rise mt-4 rounded-xl border border-primary/25 bg-primary/5 p-4"
+          style={{ animationDelay: "220ms" }}
+        >
+          <p className="flex items-center gap-1.5 text-sm font-semibold text-primary">
+            <Sparkles className="h-4 w-4" />
+            Just looking around?
+          </p>
+          <p className="mt-1 text-sm text-ink-secondary">
+            Explore the app with a pre-filled demo account — real dashboards,
+            budgets, and goals, no signup needed.
+          </p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Email <span className="font-medium text-foreground">{DEMO_EMAIL}</span>
+            <span className="mx-1.5">·</span>
+            Password <span className="font-medium text-foreground">{DEMO_PASSWORD}</span>
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              form.setValue("email", DEMO_EMAIL);
+              form.setValue("password", DEMO_PASSWORD);
+              form.handleSubmit(onSubmit)();
+            }}
+            className="press mt-3 inline-flex h-9 w-full items-center justify-center rounded-lg border border-primary/40 bg-card text-sm font-medium text-primary shadow-sm transition-colors hover:bg-primary hover:text-primary-foreground"
+          >
+            Try the demo account
+          </button>
         </div>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">

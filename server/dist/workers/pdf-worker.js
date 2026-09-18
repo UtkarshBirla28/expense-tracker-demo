@@ -42,10 +42,10 @@ const { userId, model, offset, limit } = worker_threads_1.workerData;
         transactions.forEach((txn, index) => {
             let line;
             if (model === "income") {
-                line = `${offset + index + 1}. $${txn.amount.toFixed(2)} - ${txn.source.toUpperCase()} (${new Date(txn.createdAt).toLocaleDateString()})`;
+                line = `${offset + index + 1}. Rs. ${txn.amount.toLocaleString("en-IN")} - ${txn.source.toUpperCase()} (${new Date(txn.createdAt).toLocaleDateString()})`;
             }
             else {
-                line = `${offset + index + 1}. $${txn.amount.toFixed(2)} - ${txn.category.toUpperCase()} (${new Date(txn.createdAt).toLocaleDateString()})`;
+                line = `${offset + index + 1}. Rs. ${txn.amount.toLocaleString("en-IN")} - ${txn.category.toUpperCase()} (${new Date(txn.createdAt).toLocaleDateString()})`;
             }
             doc.fontSize(10).font("Helvetica").text(line);
             if (doc.y > 700) {

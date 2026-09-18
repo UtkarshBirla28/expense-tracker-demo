@@ -39,25 +39,27 @@ const MonthlyTrendChart: FC<MonthlyTrendChartProps> = ({ trends }) => {
   return (
     <div>
       <div className="flex items-end gap-2 sm:gap-4" style={{ height: 180 }}>
-        {trends.map((point) => (
+        {trends.map((point, index) => (
           <div key={point.month} className="flex h-full flex-1 flex-col justify-end">
             <div className="flex h-full items-end justify-center gap-1">
               <div
                 title={`Income ${monthLabel(point.month)}: ${formatCurrency(point.income)}`}
-                className="w-full max-w-6 rounded-t-[4px] transition-opacity hover:opacity-80"
+                className="animate-grow-y w-full max-w-6 rounded-t-[4px] transition-opacity hover:opacity-80"
                 style={{
                   height: `${(point.income / max) * 100}%`,
                   minHeight: point.income > 0 ? 3 : 0,
                   backgroundColor: INCOME_COLOR,
+                  animationDelay: `${index * 70}ms`,
                 }}
               />
               <div
                 title={`Expenses ${monthLabel(point.month)}: ${formatCurrency(point.expense)}`}
-                className="w-full max-w-6 rounded-t-[4px] transition-opacity hover:opacity-80"
+                className="animate-grow-y w-full max-w-6 rounded-t-[4px] transition-opacity hover:opacity-80"
                 style={{
                   height: `${(point.expense / max) * 100}%`,
                   minHeight: point.expense > 0 ? 3 : 0,
                   backgroundColor: EXPENSE_COLOR,
+                  animationDelay: `${index * 70 + 35}ms`,
                 }}
               />
             </div>

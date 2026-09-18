@@ -126,7 +126,7 @@ const AddTransactionForm: FC<AddTransactionFormProps> = ({ onSubmit, editing, on
               <FormControl>
                 <div className="relative">
                   <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-muted-foreground">
-                    $
+                    ₹
                   </span>
                   <Input
                     type="number"

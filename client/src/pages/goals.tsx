@@ -77,7 +77,7 @@ export default function GoalsPage() {
 
   return (
     <RootLayout>
-      <div>
+      <div className="animate-rise">
         <h1 className="text-2xl font-semibold tracking-tight">Savings goals</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Put money aside for the things you&apos;re working toward.
@@ -87,7 +87,8 @@ export default function GoalsPage() {
       {/* Create a goal */}
       <form
         onSubmit={handleCreate}
-        className="mt-8 rounded-xl border border-border bg-card p-5 shadow-sm"
+        className="animate-rise mt-8 rounded-xl border border-border bg-card p-5 shadow-sm"
+        style={{ animationDelay: "100ms" }}
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
           <div className="flex-1">
@@ -107,7 +108,7 @@ export default function GoalsPage() {
             </label>
             <div className="relative">
               <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-muted-foreground">
-                $
+                ₹
               </span>
               <Input
                 type="number"
@@ -196,7 +197,7 @@ function GoalCard({ goal, onContribute, onDelete }: GoalCardProps) {
   }
 
   return (
-    <div className="group rounded-xl border border-border bg-card p-5 shadow-sm">
+    <div className="card-lift animate-rise group rounded-xl border border-border bg-card p-5 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -234,7 +235,7 @@ function GoalCard({ goal, onContribute, onDelete }: GoalCardProps) {
         <form onSubmit={handleAdd} className="mt-4 flex gap-2">
           <div className="relative flex-1">
             <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-muted-foreground">
-              $
+              ₹
             </span>
             <Input
               type="number"
