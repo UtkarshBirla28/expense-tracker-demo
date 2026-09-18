@@ -48,8 +48,10 @@ export default function SigninPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12">
-      <div className="w-full max-w-sm">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-4 py-12">
+      <div className="orb orb-a -top-24 -left-24 h-96 w-96" style={{ background: "#cde2fb" }} />
+      <div className="orb orb-b -bottom-32 -right-24 h-[28rem] w-[28rem]" style={{ background: "#d3f3e6" }} />
+      <div className="relative w-full max-w-sm">
         <div className="animate-rise flex flex-col items-center text-center">
           <span className="animate-pop flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
             <Wallet className="h-6 w-6" strokeWidth={2.2} />

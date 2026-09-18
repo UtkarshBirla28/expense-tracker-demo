@@ -8,8 +8,10 @@ import useIncome from "@/hooks/use-income"
 import useExpense from "@/hooks/use-expense"
 import type { TransactionFormValues, EditingTransaction } from "@/components/add-transaction-form"
 import type { TransactionRow } from "@/components/transaction-list"
+import { useToast } from "@/components/toast"
 
 export default function TransactionsPage() {
+  const { toast } = useToast()
   const [incomes, setIncomes] = useState<Income[]>([])
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -62,9 +64,17 @@ export default function TransactionsPage() {
           await addIncome(incomeData)
         }
       }
+      toast(
+        editing
+          ? "Transaction updated"
+          : data.type === "expense"
+            ? "Expense added"
+            : "Income added"
+      )
       setEditing(null)
       fetchData() // Refresh both lists
     } catch (error) {
+      toast("Could not save transaction", "error")
       console.error('Failed to save transaction:', error)
     }
   }
@@ -84,8 +94,10 @@ export default function TransactionsPage() {
   const handleDeleteIncome = async (id: string) => {
     try {
       await deleteIncome(id)
+      toast("Income deleted")
       fetchData()
     } catch (error) {
+      toast("Could not delete income", "error")
       console.error('Failed to delete income:', error)
     }
   }
@@ -93,8 +105,10 @@ export default function TransactionsPage() {
   const handleDeleteExpense = async (id: string) => {
     try {
       await deleteExpense(id)
+      toast("Expense deleted")
       fetchData()
     } catch (error) {
+      toast("Could not delete expense", "error")
       console.error('Failed to delete expense:', error)
     }
   }

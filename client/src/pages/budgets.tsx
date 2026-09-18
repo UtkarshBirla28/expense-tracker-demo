@@ -6,8 +6,10 @@ import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import useBudget from "@/hooks/use-budget"
 import type { Budget } from "@/types"
+import { useToast } from "@/components/toast"
 
 export default function BudgetsPage() {
+  const { toast } = useToast()
   const { getBudgets, saveBudget, deleteBudget } = useBudget()
   const [budgets, setBudgets] = useState<Budget[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -46,6 +48,7 @@ export default function BudgetsPage() {
     setIsSaving(true)
     try {
       await saveBudget({ category: category.trim(), amount: parsedAmount })
+      toast(`Budget set for ${category.trim().toLowerCase()}`)
       setCategory("")
       setAmount("")
       await fetchData()
@@ -60,8 +63,10 @@ export default function BudgetsPage() {
   const handleDelete = async (id: number) => {
     try {
       await deleteBudget(id)
+      toast("Budget deleted")
       await fetchData()
     } catch (error) {
+      toast("Could not delete budget", "error")
       console.error("Failed to delete budget:", error)
     }
   }

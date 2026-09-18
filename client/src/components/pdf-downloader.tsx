@@ -2,16 +2,21 @@ import type React from "react"
 import { useState } from "react"
 import { Download, Loader2 } from "lucide-react"
 import usePdfDownload from "@/hooks/use-pdf-download"
+import { useToast } from "@/components/toast"
 
 const PdfDownloader: React.FC = () => {
   const { downloadPdf } = usePdfDownload()
+  const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
 
   const handleDownload = async () => {
     setIsLoading(true)
     try {
       const pdfBlob = await downloadPdf()
-      if (!pdfBlob) return
+      if (!pdfBlob) {
+        toast("Could not generate the report", "error")
+        return
+      }
 
       const url = window.URL.createObjectURL(pdfBlob)
       const link = document.createElement("a")
@@ -20,7 +25,9 @@ const PdfDownloader: React.FC = () => {
       document.body.appendChild(link)
       link.click()
       link.parentNode?.removeChild(link)
+      toast("Report downloaded")
     } catch (error) {
+      toast("Could not download the report", "error")
       console.error("Error downloading PDF:", error)
     } finally {
       setIsLoading(false)

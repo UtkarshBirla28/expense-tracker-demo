@@ -134,18 +134,50 @@ export default function Home() {
     .slice(0, 3);
 
   const topGoals = goals.slice(0, 3);
+  const thisMonth = trends.length > 0 ? trends[trends.length - 1] : null;
 
   return (
     <RootLayout>
       <div className="animate-rise flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Overview</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">{getGreeting()} 👋</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Your money at a glance.
+            Here&apos;s your money at a glance ·{" "}
+            {new Date().toLocaleDateString("en-IN", {
+              weekday: "long",
+              day: "numeric",
+              month: "short",
+            })}
           </p>
         </div>
         <PdfDownloader />
       </div>
+
+      {/* This-month insight pills */}
+      {!isLoading && thisMonth && (thisMonth.income > 0 || thisMonth.expense > 0) && (
+        <div className="animate-rise mt-5 flex flex-wrap gap-2" style={{ animationDelay: "60ms" }}>
+          <InsightPill
+            label="Spent this month"
+            value={formatCurrency(thisMonth.expense)}
+            tone="negative"
+          />
+          <InsightPill
+            label="Earned this month"
+            value={formatCurrency(thisMonth.income)}
+            tone="positive"
+          />
+          {thisMonth.income > 0 && (
+            <InsightPill
+              label="Savings rate"
+              value={`${Math.max(
+                Math.round(((thisMonth.income - thisMonth.expense) / thisMonth.income) * 100),
+                0
+              )}%`}
+              tone="primary"
+            />
+          )}
+        </div>
+      )}
 
       {/* KPI tiles */}
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -448,6 +480,37 @@ export default function Home() {
   );
 }
 
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
+}
+
+function InsightPill({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone: "positive" | "negative" | "primary";
+}) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-baseline gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-transform hover:scale-105",
+        tone === "positive" && "border-positive/20 bg-positive-soft/60 text-positive",
+        tone === "negative" && "border-negative/20 bg-negative-soft/60 text-negative",
+        tone === "primary" && "border-primary/20 bg-primary/8 text-primary"
+      )}
+    >
+      <span className="opacity-75">{label}</span>
+      <span className="text-[13px] font-semibold tabular-nums">{value}</span>
+    </span>
+  );
+}
+
 function CategorySkeleton() {
   return (
     <div className="mt-6 space-y-5">
@@ -501,14 +564,14 @@ function StatTile({ label, amount, icon, chipClass, valueClass, isLoading, delay
   const animated = useCountUp(amount);
   return (
     <div
-      className="card-lift animate-rise rounded-xl border border-border bg-card p-5 shadow-sm"
+      className="card-lift animate-rise group rounded-xl border border-border bg-card p-5 shadow-sm"
       style={{ animationDelay: `${delay}ms` }}
     >
       <div className="flex items-center justify-between">
         <p className="text-[13px] font-medium text-muted-foreground">{label}</p>
         <span
           className={cn(
-            "animate-pop flex h-8 w-8 items-center justify-center rounded-lg",
+            "animate-pop flex h-8 w-8 items-center justify-center rounded-lg transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110",
             chipClass
           )}
           style={{ animationDelay: `${delay + 200}ms` }}

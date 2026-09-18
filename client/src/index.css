@@ -151,6 +151,73 @@
   animation: fade-in 0.25s ease-out both;
 }
 
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toast-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+}
+
+.toast-enter {
+  animation: toast-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.toast-exit {
+  animation: toast-out 0.25s ease-in both;
+}
+
+/* Slow ambient drift for auth-page background orbs */
+@keyframes drift-a {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(40px, -30px) scale(1.12);
+  }
+}
+
+@keyframes drift-b {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1.08);
+  }
+  50% {
+    transform: translate(-35px, 25px) scale(0.95);
+  }
+}
+
+.orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(70px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.orb-a {
+  animation: drift-a 13s ease-in-out infinite;
+}
+
+.orb-b {
+  animation: drift-b 17s ease-in-out infinite;
+}
+
 /* Interactive card lift */
 .card-lift {
   transition:
@@ -182,7 +249,11 @@
   .animate-grow-x,
   .animate-grow-y,
   .animate-slide-in-left,
-  .animate-fade-in {
+  .animate-fade-in,
+  .toast-enter,
+  .toast-exit,
+  .orb-a,
+  .orb-b {
     animation: none;
   }
   .card-lift,

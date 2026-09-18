@@ -6,8 +6,10 @@ import { Skeleton } from "@/components/ui/skeleton"
 import useGoal from "@/hooks/use-goal"
 import { formatCurrency } from "@/lib/format"
 import type { Goal } from "@/types"
+import { useToast } from "@/components/toast"
 
 export default function GoalsPage() {
+  const { toast } = useToast()
   const { getGoals, addGoal, contributeToGoal, deleteGoal } = useGoal()
   const [goals, setGoals] = useState<Goal[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -46,6 +48,7 @@ export default function GoalsPage() {
     setIsSaving(true)
     try {
       await addGoal({ name: name.trim(), targetAmount: parsedTarget })
+      toast(`Goal "${name.trim()}" created`)
       setName("")
       setTarget("")
       await fetchData()
@@ -60,8 +63,10 @@ export default function GoalsPage() {
   const handleContribute = async (id: number, amount: number) => {
     try {
       await contributeToGoal(id, amount)
+      toast(`${formatCurrency(amount)} added to your goal`)
       await fetchData()
     } catch (error) {
+      toast("Could not add contribution", "error")
       console.error("Failed to add contribution:", error)
     }
   }
@@ -69,8 +74,10 @@ export default function GoalsPage() {
   const handleDelete = async (id: number) => {
     try {
       await deleteGoal(id)
+      toast("Goal deleted")
       await fetchData()
     } catch (error) {
+      toast("Could not delete goal", "error")
       console.error("Failed to delete goal:", error)
     }
   }
