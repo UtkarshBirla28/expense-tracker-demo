@@ -6,14 +6,16 @@ import IncomeList from "@/components/income-list"
 import RootLayout from "@/layout"
 import useIncome from "@/hooks/use-income"
 import useExpense from "@/hooks/use-expense"
-import type { TransactionFormValues } from "@/components/add-transaction-form"
+import type { TransactionFormValues, EditingTransaction } from "@/components/add-transaction-form"
+import type { TransactionRow } from "@/components/transaction-list"
 
 export default function TransactionsPage() {
   const [incomes, setIncomes] = useState<Income[]>([])
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const { getIncomes, addIncome, deleteIncome } = useIncome()
-  const { getExpenses, addExpense, deleteExpense } = useExpense()
+  const [editing, setEditing] = useState<EditingTransaction | null>(null)
+  const { getIncomes, addIncome, updateIncome, deleteIncome } = useIncome()
+  const { getExpenses, addExpense, updateExpense, deleteExpense } = useExpense()
 
   const fetchData = async () => {
     setIsLoading(true)
@@ -43,19 +45,40 @@ export default function TransactionsPage() {
           category: data.category,
           description: data.description
         }
-        await addExpense(expenseData)
+        if (editing) {
+          await updateExpense(editing.id, expenseData)
+        } else {
+          await addExpense(expenseData)
+        }
       } else {
         const incomeData = {
           amount: data.amount,
           source: data.category,
           description: data.description
         }
-        await addIncome(incomeData)
+        if (editing) {
+          await updateIncome(editing.id, incomeData)
+        } else {
+          await addIncome(incomeData)
+        }
       }
+      setEditing(null)
       fetchData() // Refresh both lists
     } catch (error) {
-      console.error('Failed to add transaction:', error)
+      console.error('Failed to save transaction:', error)
     }
+  }
+
+  const startEditing = (type: "expense" | "income") => (row: TransactionRow) => {
+    setEditing({
+      id: row.id,
+      values: {
+        type,
+        amount: row.amount,
+        category: row.tag,
+        description: row.description,
+      },
+    })
   }
 
   const handleDeleteIncome = async (id: string) => {
@@ -87,17 +110,23 @@ export default function TransactionsPage() {
 
       <div className="mt-8 grid grid-cols-1 items-start gap-6 lg:grid-cols-5">
         <div className="lg:sticky lg:top-8 lg:col-span-2">
-          <AddTransactionForm onSubmit={handleAddTransaction} />
+          <AddTransactionForm
+            onSubmit={handleAddTransaction}
+            editing={editing}
+            onCancelEdit={() => setEditing(null)}
+          />
         </div>
         <div className="space-y-6 lg:col-span-3">
           <ExpenseList
             expenses={expenses}
             onDelete={handleDeleteExpense}
+            onEdit={startEditing("expense")}
             isLoading={isLoading}
           />
           <IncomeList
             incomes={incomes}
             onDelete={handleDeleteIncome}
+            onEdit={startEditing("income")}
             isLoading={isLoading}
           />
         </div>

@@ -1,14 +1,15 @@
 import type { FC } from "react"
 import type { Income } from "../types"
-import TransactionList from "@/components/transaction-list"
+import TransactionList, { type TransactionRow } from "@/components/transaction-list"
 
 interface IncomeListProps {
   incomes: Income[]
   onDelete: (id: string) => Promise<void>
+  onEdit?: (row: TransactionRow) => void
   isLoading: boolean
 }
 
-const IncomeList: FC<IncomeListProps> = ({ incomes, onDelete, isLoading }) => (
+const IncomeList: FC<IncomeListProps> = ({ incomes, onDelete, onEdit, isLoading }) => (
   <TransactionList
     title="Income"
     kind="income"
@@ -20,6 +21,7 @@ const IncomeList: FC<IncomeListProps> = ({ incomes, onDelete, isLoading }) => (
       amount: i.amount,
     }))}
     onDelete={onDelete}
+    onEdit={onEdit}
     isLoading={isLoading}
     emptyMessage="No income recorded yet."
   />

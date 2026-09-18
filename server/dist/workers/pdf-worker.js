@@ -3,7 +3,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-// workers/pdfWorker.js
 const worker_threads_1 = require("worker_threads");
 const pdfkit_1 = __importDefault(require("pdfkit"));
 const db_1 = __importDefault(require("../config/db"));
@@ -22,7 +21,7 @@ const { userId, model, offset, limit } = worker_threads_1.workerData;
                 ? { id: true, amount: true, createdAt: true, source: true }
                 : { id: true, amount: true, createdAt: true, category: true },
         });
-        // Create a PDF chunk for this batch
+        // Created a PDF chunk for this batch
         const doc = new pdfkit_1.default({ margin: 50, size: "A4" });
         const tempDir = path_1.default.join(__dirname, "../temp");
         if (!fs_1.default.existsSync(tempDir)) {
@@ -31,10 +30,13 @@ const { userId, model, offset, limit } = worker_threads_1.workerData;
         const filePath = path_1.default.join(tempDir, `${model}_${offset}.pdf`);
         const writeStream = fs_1.default.createWriteStream(filePath);
         doc.pipe(writeStream);
-        // Write a small header for this chunk
-        doc.fontSize(14)
+        // small header for this chunk
+        doc
+            .fontSize(14)
             .font("Helvetica-Bold")
-            .text(`${model.toUpperCase()} Details (Batch starting at ${offset})`, { align: "center" });
+            .text(`${model.toUpperCase()} Details (Batch starting at ${offset})`, {
+            align: "center",
+        });
         doc.moveDown();
         // List each transaction with simple formatting
         transactions.forEach((txn, index) => {

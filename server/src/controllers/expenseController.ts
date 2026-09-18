@@ -283,3 +283,137 @@ export const deleteIncome = async (
       .json({ message: "Something went wrong while deleting income" });
   }
 };
+
+// Returns income vs expense totals for each of the last 6 months
+export const getMonthlyTrends = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  const userId = req.userId;
+
+  try {
+    const now = new Date();
+    const windowStart = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+
+    const [expenses, incomes] = await Promise.all([
+      prisma.expense.findMany({
+        where: { userId: userId!, createdAt: { gte: windowStart } },
+        select: { amount: true, createdAt: true },
+      }),
+      prisma.income.findMany({
+        where: { userId: userId!, createdAt: { gte: windowStart } },
+        select: { amount: true, createdAt: true },
+      }),
+    ]);
+
+    const monthKey = (date: Date) =>
+      `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+
+    const months: { month: string; income: number; expense: number }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push({ month: monthKey(date), income: 0, expense: 0 });
+    }
+    const byMonth = new Map(months.map((entry) => [entry.month, entry]));
+
+    for (const expense of expenses) {
+      const entry = byMonth.get(monthKey(expense.createdAt));
+      if (entry) entry.expense += expense.amount;
+    }
+    for (const income of incomes) {
+      const entry = byMonth.get(monthKey(income.createdAt));
+      if (entry) entry.income += income.amount;
+    }
+
+    res.status(200).json({ trends: months });
+  } catch (error) {
+    console.error("Get trends error:", error);
+    res
+      .status(500)
+      .json({ message: "Something went wrong while fetching trends" });
+  }
+};
+
+// Updates an existing expense owned by the requesting user
+export const updateExpense = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  const { id } = req.params;
+  const { amount, category, description } = req.body;
+  const userId = req.userId;
+
+  try {
+    if (!amount || typeof amount !== "number" || amount <= 0) {
+      res.status(400).json({ message: "Valid amount is required" });
+      return;
+    }
+    if (!category || typeof category !== "string") {
+      res.status(400).json({ message: "Valid category is required" });
+      return;
+    }
+
+    const existing = await prisma.expense.findFirst({
+      where: { id: Number(id), userId: userId! },
+    });
+
+    if (!existing) {
+      res.status(404).json({ message: "Expense not found or unauthorized" });
+      return;
+    }
+
+    const expense = await prisma.expense.update({
+      where: { id: existing.id },
+      data: { amount, category, description: description || "" },
+    });
+
+    res.status(200).json({ message: "Expense updated successfully", expense });
+  } catch (error) {
+    console.error("Update expense error:", error);
+    res
+      .status(500)
+      .json({ message: "Something went wrong while updating expense" });
+  }
+};
+
+// Updates an existing income owned by the requesting user
+export const updateIncome = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  const { id } = req.params;
+  const { amount, source, description } = req.body;
+  const userId = req.userId;
+
+  try {
+    if (!amount || typeof amount !== "number" || amount <= 0) {
+      res.status(400).json({ message: "Valid amount is required" });
+      return;
+    }
+    if (!source || typeof source !== "string") {
+      res.status(400).json({ message: "Valid source is required" });
+      return;
+    }
+
+    const existing = await prisma.income.findFirst({
+      where: { id: Number(id), userId: userId! },
+    });
+
+    if (!existing) {
+      res.status(404).json({ message: "Income not found or unauthorized" });
+      return;
+    }
+
+    const income = await prisma.income.update({
+      where: { id: existing.id },
+      data: { amount, source, description: description || "" },
+    });
+
+    res.status(200).json({ message: "Income updated successfully", income });
+  } catch (error) {
+    console.error("Update income error:", error);
+    res
+      .status(500)
+      .json({ message: "Something went wrong while updating income" });
+  }
+};

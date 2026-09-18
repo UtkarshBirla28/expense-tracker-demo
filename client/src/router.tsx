@@ -6,6 +6,8 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 const SignIn = lazy(() => import("./pages/auth/Sign-in"));
 const SignUp = lazy(() => import("./pages/auth/Sign-up"));
 const Home = lazy(() => import("./pages/index"));
+const Budgets = lazy(() => import("./pages/budgets"));
+const Goals = lazy(() => import("./pages/goals"));
 
 const router = createBrowserRouter([
   {
@@ -29,6 +31,22 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <Transaction />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/budgets",
+    element: (
+      <ProtectedRoute>
+        <Budgets />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/goals",
+    element: (
+      <ProtectedRoute>
+        <Goals />
       </ProtectedRoute>
     ),
   },

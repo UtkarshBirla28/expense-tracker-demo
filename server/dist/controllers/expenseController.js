@@ -3,10 +3,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.exportToPdf = exports.deleteIncome = exports.deleteExpense = exports.getIncomes = exports.getExpenses = exports.getFinancialSummary = exports.addIncome = exports.addExpense = void 0;
+exports.updateIncome = exports.updateExpense = exports.getMonthlyTrends = exports.deleteIncome = exports.deleteExpense = exports.getIncomes = exports.getExpenses = exports.getFinancialSummary = exports.addIncome = exports.addExpense = void 0;
 const db_1 = __importDefault(require("../config/db"));
-const pdfkit_1 = __importDefault(require("pdfkit"));
-const PAGE_LIMIT = 2000; // Process data in chunks
+// Process data in chunks
+// Handles creation of new expenses with validation and user association
 const addExpense = async (req, res) => {
     const { amount, category, description } = req.body;
     const userId = req.userId;
@@ -40,6 +40,7 @@ const addExpense = async (req, res) => {
     }
 };
 exports.addExpense = addExpense;
+// Manages income entries with amount validation and user-specific storage
 const addIncome = async (req, res) => {
     const { amount, source, description } = req.body;
     const userId = req.userId;
@@ -69,6 +70,7 @@ const addIncome = async (req, res) => {
     }
 };
 exports.addIncome = addIncome;
+// Retrieves financial data for dashboard, including expense categories and income sources
 const getFinancialSummary = async (req, res) => {
     const userId = req.userId;
     try {
@@ -102,7 +104,7 @@ const getFinancialSummary = async (req, res) => {
         }));
         const formattedIncome = incomeBySource.map((item) => ({
             name: item.source,
-            value: item._sum.amount || 0, // Ensure value is not undefined
+            value: item._sum.amount || 0, // Ensures value is not undefined
         }));
         res.status(200).json({
             summary: {
@@ -122,6 +124,7 @@ const getFinancialSummary = async (req, res) => {
     }
 };
 exports.getFinancialSummary = getFinancialSummary;
+// Fetches paginated expense records with filtering capabilities
 const getExpenses = async (req, res) => {
     const userId = req.userId;
     const { category } = req.query;
@@ -148,6 +151,7 @@ const getExpenses = async (req, res) => {
     }
 };
 exports.getExpenses = getExpenses;
+// Fetches income records for the authenticated user
 const getIncomes = async (req, res) => {
     const userId = req.userId;
     try {
@@ -167,7 +171,7 @@ const getIncomes = async (req, res) => {
     }
 };
 exports.getIncomes = getIncomes;
-// Deletion endpoints
+// Handles secure deletion of expense records with user verification
 const deleteExpense = async (req, res) => {
     const { id } = req.params;
     const userId = req.userId;
@@ -195,6 +199,7 @@ const deleteExpense = async (req, res) => {
     }
 };
 exports.deleteExpense = deleteExpense;
+// Handles secure deletion of income records with user verification
 const deleteIncome = async (req, res) => {
     const { id } = req.params;
     const userId = req.userId;
@@ -222,101 +227,116 @@ const deleteIncome = async (req, res) => {
     }
 };
 exports.deleteIncome = deleteIncome;
-const exportToPdf = async (req, res) => {
+// Returns income vs expense totals for each of the last 6 months
+const getMonthlyTrends = async (req, res) => {
     const userId = req.userId;
     try {
-        res.setHeader("Content-Type", "application/pdf");
-        res.setHeader("Content-Disposition", "attachment; filename=financial-report.pdf");
-        const doc = new pdfkit_1.default({ margin: 50, size: "A4" });
-        doc.pipe(res);
-        // Header (Stays on the first page)
-        doc
-            .fontSize(24)
-            .font("Helvetica-Bold")
-            .text("Financial Report", { align: "center" });
-        doc.moveDown();
-        // Financial Summary (Will be compact, no extra page break)
-        const [totalIncome, totalExpenses] = await Promise.all([
-            db_1.default.income.aggregate({ _sum: { amount: true }, where: { userId } }),
-            db_1.default.expense.aggregate({ _sum: { amount: true }, where: { userId } }),
+        const now = new Date();
+        const windowStart = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+        const [expenses, incomes] = await Promise.all([
+            db_1.default.expense.findMany({
+                where: { userId: userId, createdAt: { gte: windowStart } },
+                select: { amount: true, createdAt: true },
+            }),
+            db_1.default.income.findMany({
+                where: { userId: userId, createdAt: { gte: windowStart } },
+                select: { amount: true, createdAt: true },
+            }),
         ]);
-        const balance = (totalIncome._sum.amount || 0) - (totalExpenses._sum.amount || 0);
-        doc
-            .fontSize(16)
-            .font("Helvetica-Bold")
-            .text("Financial Summary")
-            .moveDown(0.5);
-        doc
-            .fontSize(12)
-            .font("Helvetica")
-            .text(`Total Income: $${(totalIncome._sum.amount || 0).toFixed(2)}`)
-            .text(`Total Expenses: $${(totalExpenses._sum.amount || 0).toFixed(2)}`)
-            .text(`Current Balance: $${balance.toFixed(2)}`);
-        doc.moveDown(1.5); // Gives spacing before income/expense details
-        // Optimized function for Income/Expense
-        const addPaginatedData = async (title, model, formatItem) => {
-            doc.fontSize(14).font("Helvetica-Bold").text(title).moveDown(0.5);
-            let lastCreatedAt = null;
-            let lastId = null;
-            let indexCounter = 1;
-            while (true) {
-                const whereClause = { userId };
-                if (lastCreatedAt && lastId) {
-                    whereClause.OR = [
-                        { createdAt: { lt: lastCreatedAt } },
-                        {
-                            AND: [{ createdAt: lastCreatedAt }, { id: { gt: lastId } }],
-                        },
-                    ];
-                }
-                const data = await db_1.default[model].findMany({
-                    where: whereClause,
-                    orderBy: [{ createdAt: "desc" }, { id: "asc" }],
-                    take: PAGE_LIMIT,
-                    select: Object.assign({ id: true, amount: true, createdAt: true }, (model === "income" ? { source: true } : { category: true })),
-                });
-                if (data.length === 0)
-                    break;
-                // Improved layout: Tabular formatting for clarity
-                data.forEach((item) => {
-                    if (doc.y > 700)
-                        doc.addPage();
-                    doc
-                        .fontSize(10)
-                        .font("Helvetica")
-                        .text(formatItem(item, indexCounter));
-                    indexCounter++;
-                });
-                const lastItem = data[data.length - 1];
-                lastCreatedAt = lastItem.createdAt;
-                lastId = lastItem.id;
-                if (data.length < PAGE_LIMIT)
-                    break;
-            }
-            doc.moveDown(1); // Extra spacing after each section
-        };
-        // Adding Income & Expense Data
-        await addPaginatedData("Income Breakdown", "income", (income, index) => {
-            var _a;
-            return `${index}. $${income.amount.toFixed(2)} - ${(_a = income.source) === null || _a === void 0 ? void 0 : _a.toUpperCase()} (${new Date(income.createdAt).toLocaleDateString()})`;
-        });
-        await addPaginatedData("Expense Breakdown", "expense", (expense, index) => {
-            var _a;
-            return `${index}. $${expense.amount.toFixed(2)} - ${(_a = expense.category) === null || _a === void 0 ? void 0 : _a.toUpperCase()} (${new Date(expense.createdAt).toLocaleDateString()})`;
-        });
-        // Footer (Only at the bottom of the last page)
-        doc
-            .fontSize(8)
-            .font("Helvetica")
-            .text("This report was generated automatically by the Expense Tracker system.", 50, doc.page.height - 50, { align: "center" });
-        doc.end();
+        const monthKey = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+        const months = [];
+        for (let i = 5; i >= 0; i--) {
+            const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            months.push({ month: monthKey(date), income: 0, expense: 0 });
+        }
+        const byMonth = new Map(months.map((entry) => [entry.month, entry]));
+        for (const expense of expenses) {
+            const entry = byMonth.get(monthKey(expense.createdAt));
+            if (entry)
+                entry.expense += expense.amount;
+        }
+        for (const income of incomes) {
+            const entry = byMonth.get(monthKey(income.createdAt));
+            if (entry)
+                entry.income += income.amount;
+        }
+        res.status(200).json({ trends: months });
     }
     catch (error) {
-        console.error("PDF export error:", error);
-        res.status(500).json({
-            message: "Something went wrong while generating PDF",
-            error: error instanceof Error ? error.message : "Unknown error",
-        });
+        console.error("Get trends error:", error);
+        res
+            .status(500)
+            .json({ message: "Something went wrong while fetching trends" });
     }
 };
-exports.exportToPdf = exportToPdf;
+exports.getMonthlyTrends = getMonthlyTrends;
+// Updates an existing expense owned by the requesting user
+const updateExpense = async (req, res) => {
+    const { id } = req.params;
+    const { amount, category, description } = req.body;
+    const userId = req.userId;
+    try {
+        if (!amount || typeof amount !== "number" || amount <= 0) {
+            res.status(400).json({ message: "Valid amount is required" });
+            return;
+        }
+        if (!category || typeof category !== "string") {
+            res.status(400).json({ message: "Valid category is required" });
+            return;
+        }
+        const existing = await db_1.default.expense.findFirst({
+            where: { id: Number(id), userId: userId },
+        });
+        if (!existing) {
+            res.status(404).json({ message: "Expense not found or unauthorized" });
+            return;
+        }
+        const expense = await db_1.default.expense.update({
+            where: { id: existing.id },
+            data: { amount, category, description: description || "" },
+        });
+        res.status(200).json({ message: "Expense updated successfully", expense });
+    }
+    catch (error) {
+        console.error("Update expense error:", error);
+        res
+            .status(500)
+            .json({ message: "Something went wrong while updating expense" });
+    }
+};
+exports.updateExpense = updateExpense;
+// Updates an existing income owned by the requesting user
+const updateIncome = async (req, res) => {
+    const { id } = req.params;
+    const { amount, source, description } = req.body;
+    const userId = req.userId;
+    try {
+        if (!amount || typeof amount !== "number" || amount <= 0) {
+            res.status(400).json({ message: "Valid amount is required" });
+            return;
+        }
+        if (!source || typeof source !== "string") {
+            res.status(400).json({ message: "Valid source is required" });
+            return;
+        }
+        const existing = await db_1.default.income.findFirst({
+            where: { id: Number(id), userId: userId },
+        });
+        if (!existing) {
+            res.status(404).json({ message: "Income not found or unauthorized" });
+            return;
+        }
+        const income = await db_1.default.income.update({
+            where: { id: existing.id },
+            data: { amount, source, description: description || "" },
+        });
+        res.status(200).json({ message: "Income updated successfully", income });
+    }
+    catch (error) {
+        console.error("Update income error:", error);
+        res
+            .status(500)
+            .json({ message: "Something went wrong while updating income" });
+    }
+};
+exports.updateIncome = updateIncome;

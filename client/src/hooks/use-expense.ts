@@ -63,6 +63,28 @@ const useExpenses = () => {
       }
     }
 
+    const updateExpense = async (id: string, transaction: AddExpenseData): Promise<Expense> => {
+      setIsAdding(true);
+      setAddError(null);
+      try {
+          const response = await axiosInstance.put<{ expense: Expense; message: string }>(
+              `${process.env.VITE_API_URL}/api/transactions/expense/${id}`,
+              {
+                  amount: transaction.amount,
+                  category: transaction.category,
+                  description: transaction.description
+              }
+          )
+          return response.data.expense;
+      } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred'
+          setAddError(errorMessage);
+          throw new Error(errorMessage)
+      } finally {
+          setIsAdding(false);
+      }
+    }
+
     const deleteExpense = async (id: string): Promise<void> => {
         setIsDeleting(true);
         setDeleteError(null);
@@ -79,7 +101,7 @@ const useExpenses = () => {
           setIsDeleting(false);
         }
     }
-    return { getExpenses,addExpense,deleteExpense, isLoading, error,isAdding, addError, isDeleting, deleteError }
+    return { getExpenses,addExpense,updateExpense,deleteExpense, isLoading, error,isAdding, addError, isDeleting, deleteError }
 }
 
 export default useExpenses;

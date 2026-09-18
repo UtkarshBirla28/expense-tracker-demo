@@ -8,6 +8,8 @@ const cors_1 = __importDefault(require("cors"));
 const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 const expenseRoutes_1 = __importDefault(require("./routes/expenseRoutes"));
 const pdfRoutes_1 = __importDefault(require("./routes/pdfRoutes"));
+const budgetRoutes_1 = __importDefault(require("./routes/budgetRoutes"));
+const goalRoutes_1 = __importDefault(require("./routes/goalRoutes"));
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3000;
 // Middleware
@@ -23,6 +25,8 @@ app.use(express_1.default.urlencoded({ extended: true }));
 app.use("/api/auth", authRoutes_1.default);
 app.use("/api/transactions", expenseRoutes_1.default);
 app.use("/api/pdf", pdfRoutes_1.default);
+app.use("/api/budgets", budgetRoutes_1.default);
+app.use("/api/goals", goalRoutes_1.default);
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error("Unhandled error:", err);

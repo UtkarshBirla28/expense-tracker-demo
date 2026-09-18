@@ -9,6 +9,9 @@ router.post("/income/add", authMiddleware_1.authMiddleware, expenseController_1.
 router.post("/expense/add", authMiddleware_1.authMiddleware, expenseController_1.addExpense);
 router.get("/expense", authMiddleware_1.authMiddleware, expenseController_1.getExpenses);
 router.get("/summary", authMiddleware_1.authMiddleware, expenseController_1.getFinancialSummary);
+router.get("/trends", authMiddleware_1.authMiddleware, expenseController_1.getMonthlyTrends);
+router.put("/expense/:id", authMiddleware_1.authMiddleware, expenseController_1.updateExpense);
+router.put("/income/:id", authMiddleware_1.authMiddleware, expenseController_1.updateIncome);
 router.delete("/deleteExpense/:id", authMiddleware_1.authMiddleware, expenseController_1.deleteExpense);
 router.delete("/deleteIncome/:id", authMiddleware_1.authMiddleware, expenseController_1.deleteIncome);
 exports.default = router;

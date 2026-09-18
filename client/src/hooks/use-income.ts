@@ -62,6 +62,28 @@ const useIncome = () => {
     }
   };
 
+  const updateIncome = async (id: string, transaction: AddIncomeData): Promise<Income> => {
+    setIsAdding(true);
+    setAddError(null);
+    try {
+      const response = await axiosInstance.put<{ income: Income; message: string }>(
+        `${process.env.VITE_API_URL}/api/transactions/income/${id}`,
+        {
+          amount: transaction.amount,
+          source: transaction.source,
+          description: transaction.description,
+        }
+      );
+      return response.data.income;
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      setAddError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
   const deleteIncome = async (id: string): Promise<void> => {
     setIsDeleting(true);
     setDeleteError(null);
@@ -81,6 +103,7 @@ const useIncome = () => {
   return {
     getIncomes,
     addIncome,
+    updateIncome,
     deleteIncome,
     isLoading,
     error,

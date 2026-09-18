@@ -19,7 +19,30 @@ model User {
   password String
   expenses Expense[]
   incomes Income[]
-} 
+  budgets Budget[]
+  goals   Goal[]
+}
+
+model Budget {
+  id        Int      @id @default(autoincrement())
+  category  String
+  amount    Float    // monthly limit for this category
+  createdAt DateTime @default(now())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  @@unique([userId, category])
+}
+
+model Goal {
+  id           Int      @id @default(autoincrement())
+  name         String
+  targetAmount Float
+  savedAmount  Float    @default(0)
+  createdAt    DateTime @default(now())
+  userId       Int
+  user         User     @relation(fields: [userId], references: [id])
+  @@index([userId])
+}
 
 model Expense {
   id          Int     @id @default(autoincrement())

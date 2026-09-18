@@ -6,6 +6,8 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  PiggyBank,
+  Target,
   Wallet,
   X,
 } from "lucide-react";
@@ -15,6 +17,8 @@ import { cn } from "@/lib/utils";
 const NAV_ITEMS = [
   { to: "/", label: "Overview", icon: LayoutDashboard },
   { to: "/transactions", label: "Transactions", icon: ArrowLeftRight },
+  { to: "/budgets", label: "Budgets", icon: PiggyBank },
+  { to: "/goals", label: "Goals", icon: Target },
 ];
 
 function Brand() {

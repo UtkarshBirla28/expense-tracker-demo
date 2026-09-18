@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import type { FC } from "react"
+import { useEffect, type FC } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Loader2 } from "lucide-react"
@@ -23,11 +23,18 @@ const transactionSchema = z.object({
 
 export type TransactionFormValues = z.infer<typeof transactionSchema>
 
-interface AddTransactionFormProps {
-  onSubmit: (data: TransactionFormValues) => Promise<void>
+export interface EditingTransaction {
+  id: string
+  values: TransactionFormValues
 }
 
-const AddTransactionForm: FC<AddTransactionFormProps> = ({ onSubmit }) => {
+interface AddTransactionFormProps {
+  onSubmit: (data: TransactionFormValues) => Promise<void>
+  editing?: EditingTransaction | null
+  onCancelEdit?: () => void
+}
+
+const AddTransactionForm: FC<AddTransactionFormProps> = ({ onSubmit, editing, onCancelEdit }) => {
   const form = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
@@ -40,6 +47,15 @@ const AddTransactionForm: FC<AddTransactionFormProps> = ({ onSubmit }) => {
 
   const type = form.watch("type")
   const isSubmitting = form.formState.isSubmitting
+  const isEditing = Boolean(editing)
+
+  useEffect(() => {
+    if (editing) {
+      form.reset(editing.values)
+    } else {
+      form.reset({ type: "expense", amount: 0, category: "", description: "" })
+    }
+  }, [editing, form])
 
   const handleSubmit = async (data: TransactionFormValues) => {
     try {
@@ -78,6 +94,7 @@ const AddTransactionForm: FC<AddTransactionFormProps> = ({ onSubmit }) => {
                       type="button"
                       role="tab"
                       aria-selected={field.value === value}
+                      disabled={isEditing && field.value !== value}
                       onClick={() => field.onChange(value)}
                       className={cn(
                         "h-8 rounded-md text-sm font-medium capitalize transition-all",
@@ -168,18 +185,31 @@ const AddTransactionForm: FC<AddTransactionFormProps> = ({ onSubmit }) => {
           )}
         />
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover disabled:pointer-events-none disabled:opacity-60"
-        >
-          {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
-          {isSubmitting
-            ? "Adding…"
-            : type === "expense"
-              ? "Add expense"
-              : "Add income"}
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-primary text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover disabled:pointer-events-none disabled:opacity-60"
+          >
+            {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
+            {isSubmitting
+              ? "Saving…"
+              : isEditing
+                ? "Save changes"
+                : type === "expense"
+                  ? "Add expense"
+                  : "Add income"}
+          </button>
+          {isEditing && onCancelEdit && (
+            <button
+              type="button"
+              onClick={onCancelEdit}
+              className="inline-flex h-10 items-center justify-center rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
     </Form>
   )

@@ -21,3 +21,24 @@ export interface Expense {
   }
   
   
+export interface Budget {
+  id: number
+  category: string
+  amount: number
+  spent: number
+  createdAt: string
+}
+
+export interface Goal {
+  id: number
+  name: string
+  targetAmount: number
+  savedAmount: number
+  createdAt: string
+}
+
+export interface TrendPoint {
+  month: string
+  income: number
+  expense: number
+}

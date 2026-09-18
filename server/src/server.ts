@@ -3,6 +3,8 @@ import cors from "cors";
 import authRoutes from "./routes/authRoutes";
 import expenseRoutes from "./routes/expenseRoutes";
 import pdfRoutes from "./routes/pdfRoutes";
+import budgetRoutes from "./routes/budgetRoutes";
+import goalRoutes from "./routes/goalRoutes";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,6 +23,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/auth", authRoutes);
 app.use("/api/transactions", expenseRoutes);
 app.use("/api/pdf", pdfRoutes);
+app.use("/api/budgets", budgetRoutes);
+app.use("/api/goals", goalRoutes);
 
 // Error handling middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

@@ -1,5 +1,5 @@
 import type { FC, ReactNode } from "react"
-import { ArrowDownLeft, ArrowUpRight, Inbox, Trash2 } from "lucide-react"
+import { ArrowDownLeft, ArrowUpRight, Inbox, Pencil, Trash2 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { formatCurrency, formatDate } from "@/lib/format"
 import { cn } from "@/lib/utils"
@@ -17,6 +17,7 @@ interface TransactionListProps {
   kind: "expense" | "income"
   rows: TransactionRow[]
   onDelete: (id: string) => Promise<void>
+  onEdit?: (row: TransactionRow) => void
   isLoading: boolean
   error?: string | null
   emptyMessage: string
@@ -43,6 +44,7 @@ const TransactionList: FC<TransactionListProps> = ({
   kind,
   rows,
   onDelete,
+  onEdit,
   isLoading,
   error,
   emptyMessage,
@@ -129,13 +131,24 @@ const TransactionList: FC<TransactionListProps> = ({
               {formatCurrency(row.amount)}
             </p>
 
-            <button
-              aria-label={`Delete ${row.description}`}
-              onClick={() => onDelete(row.id)}
-              className="shrink-0 rounded-md p-1.5 text-muted-foreground/50 opacity-0 transition-all hover:bg-negative-soft hover:text-negative focus-visible:opacity-100 group-hover:opacity-100"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
+            <div className="flex shrink-0 items-center gap-0.5">
+              {onEdit && (
+                <button
+                  aria-label={`Edit ${row.description}`}
+                  onClick={() => onEdit(row)}
+                  className="rounded-md p-1.5 text-muted-foreground/50 opacity-0 transition-all hover:bg-primary/10 hover:text-primary focus-visible:opacity-100 group-hover:opacity-100"
+                >
+                  <Pencil className="h-4 w-4" />
+                </button>
+              )}
+              <button
+                aria-label={`Delete ${row.description}`}
+                onClick={() => onDelete(row.id)}
+                className="rounded-md p-1.5 text-muted-foreground/50 opacity-0 transition-all hover:bg-negative-soft hover:text-negative focus-visible:opacity-100 group-hover:opacity-100"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
           </li>
         ))}
       </ul>
